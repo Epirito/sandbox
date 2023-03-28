@@ -4,6 +4,7 @@ import { LightSourceComponent } from "../logic/lightning";
 import { PhysicsSystem } from "../logic/physics";
 import { ProngSpec, ProngSystem, Signal, defaultSignal, signalHop } from "../logic/prong";
 import { examinables } from "../stuff/examinables";
+import { equals, rotatedBy, sum } from "../utils/vector";
 export const physics = new PhysicsSystem();
 export const electricity = new ProngSystem(physics);
 export const charMov = new CharacterMovement(physics);
@@ -192,6 +193,28 @@ export function makeDemux(electricity: ProngSystem) {
     
     
     return demux;
+}
+export function makeBelt(phys: PhysicsSystem) {
+    const belt = new Entity(1);
+    belt.examinableComp = examinables.belt;
+    let timeOut: number | undefined = undefined
+    phys.onPlaced(belt, ()=>{
+        const pos = phys.position(belt)!
+        phys.onPlacedAt(pos, (entity)=>{
+            if (entity!==belt) {
+                timeOut = setTimeout(()=>{
+                    const entityPos = phys.position(entity)
+                    if (entityPos &&  equals(entityPos, pos)) {
+                        phys.place(entity, {position: sum(pos, rotatedBy([1,0], phys.rotation(belt)!))})
+                    }
+                }, 100)
+            }
+        })
+    })
+    phys.onUnplaced(belt, ()=>{
+        clearTimeout(timeOut)
+    })
+    return belt;
 }
 export function makePressurePlate(phys: PhysicsSystem, electricity: ProngSystem, triggeringSize: number) {
     const plate = new Entity(1);

@@ -21,6 +21,10 @@ export default class ContainerSystem {
     this.equippedByEntity.delete(actor);
     this.containedByContainer.set(into, item);
   }
+  enter(actor: Entity, container: Entity) {
+    this.phys.unplace(actor);
+    this.containedByContainer.set(container, actor);
+  }
   withdrawFrom(actor: Entity, item: Entity, container: Entity) {
     this.containedByContainer.remove(container, item);
     this.equippedByEntity.set(actor, item);  

@@ -76,6 +76,7 @@ export class PhysicsSystem {
     this.placedAt.dispatchEvent(new CustomEvent(newPosJSON, { detail: entity }));
   }
   place(entity: Entity, options: {position?: [number, number], rotation?: number}) {
+    // to do: make it private and hide it behind a method that checks for collisions
     if (options.position===undefined) {
       options.position = this.stateByEntity.get(entity)!.position;
     }

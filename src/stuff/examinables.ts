@@ -7,5 +7,6 @@ export const examinables = {
     pressurePlate: new PlainExaminableComponent('pressure plate', ''),
     lamp: new LightSourceExaminableComponent('lamp', ''),
     mux: new PlainExaminableComponent('mux', 'Joins signals together.'),
-    demux: new PlainExaminableComponent('demux', 'Splits muxed signals.')
+    demux: new PlainExaminableComponent('demux', 'Splits muxed signals.'),
+    belt: new PlainExaminableComponent('belt', 'Moves entities.'),
 }

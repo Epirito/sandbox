@@ -1,8 +1,11 @@
-import Entity from "../logic/entity";
 import mod from "./mod";
 export function sum([x1, y1]: [number, number], [x2, y2]: [number, number])
     : [number, number] {
     return [x1 + x2, y1 + y2];
+}
+export function equals([x1, y1]: [number, number], [x2, y2]: [number, number])
+    : boolean {
+    return x1 === x2 && y1 === y2;
 }
 export function rotatedBy([x, y]: [number, number], rightAngles: number)
     : [number, number] {
@@ -18,7 +21,7 @@ export function rotatedBy([x, y]: [number, number], rightAngles: number)
     }
 }
 export function absPosition(
-attachedVector: [number, number], position: [number, number], rotation: number
+    attachedVector: [number, number], position: [number, number], rotation: number
 ): [number, number] {
-return sum(position, rotatedBy(attachedVector, rotation));
+    return sum(position, rotatedBy(attachedVector, rotation));
 }

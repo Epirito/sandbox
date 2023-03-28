@@ -6,27 +6,32 @@ import { Drawing } from './ui/draw-rot'
 import ItemsInFrontOf from './ui/ItemsInFrontOf'
 const drawing = new Drawing(10,10, physics, electricity)
 drawing.drawingInit()
-const screenUpdater = {onUpdated: ()=>{}}
+const screenUpdater = new EventTarget()
 document.addEventListener('keydown', (e) => {
+  let rotation: number | undefined = undefined
   switch(e.key) {
     case 'ArrowRight':
-      physics.place(player, {rotation: 0})
+      rotation = 0
     break
     case 'ArrowUp':
-      physics.place(player, {rotation: 1})
+      rotation = 1
     break
     case 'ArrowLeft':
-      physics.place(player, {rotation: 2})
+      rotation = 2
     break
     case 'ArrowDown':
-      physics.place(player, {rotation: 3})
+      rotation = 3
     break
   }
+  if (rotation===undefined) {
+    return
+  }
+  physics.place(player, {rotation})
   charMov.moveForward(player)
 })
 setInterval(()=>{
   drawing.draw()
-  screenUpdater.onUpdated()
+  screenUpdater.dispatchEvent(new Event('updated'))
 },1000/60)
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>

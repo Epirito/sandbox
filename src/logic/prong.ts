@@ -1,7 +1,7 @@
 import Entity from "./entity";
 import {PhysicsSystem} from "./physics";
 import { absPosition } from "../utils/vector";
-import identityFunction from "../ui/identity-function";
+import identityFunction from "../utils/identity-function";
 
 export class ProngSpec {
     constructor(

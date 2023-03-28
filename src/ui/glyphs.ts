@@ -10,6 +10,7 @@ const rawGlyphs = {
     pressurePlate: '_',
     mux: '>',
     demux: '<',
+    belt: '⬆️',
     lamp: {on: '💡', off: 'O'},
 }
 for(const glyph in rawGlyphs) {
