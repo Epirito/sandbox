@@ -13,11 +13,21 @@ export default class ContainerSystem {
   private containedByContainer: MultiMap<Entity, Entity> = new MultiMap();
   private equippedByEntity: Map<Entity, Entity> = new Map();
   constructor(private phys: PhysicsSystem) {}
-  pickUp(actor: Entity, item: Entity) {
+  tryPickUp(actor: Entity, item: Entity) {
+    if (this.getEquipped(actor)) {
+      return 'already holding something'
+    }
     this.phys.unplace(item);
     this.equippedByEntity.set(actor, item);
   }
-  insertInto(actor: Entity, item: Entity, into: Entity) {
+  tryInsertInto(actor: Entity, into: Entity) {
+    const item = this.getEquipped(actor);
+    if (!item) {
+      return 'not holding item'
+    }
+    if (this.containedByContainer.get(into)?.length === into.containerComp?.capacity) {
+      return 'container full'
+    }
     this.equippedByEntity.delete(actor);
     this.containedByContainer.set(into, item);
   }
@@ -35,16 +45,20 @@ export default class ContainerSystem {
     });
     this.containedByContainer.delete(container);
   }
-  dropEquipped(actor: Entity) {
+  tryDrop(actor: Entity) {
     const item = this.equippedByEntity.get(actor);
-    if (item) {
-      this.phys.place(item,{position: this.phys.position(actor)!, rotation: 0});
-      this.equippedByEntity.delete(actor);
+    if (!item) {
+      return 'not holding item'
     }
+    this.phys.place(item,{position: this.phys.position(actor)!, rotation: 0});
+    this.equippedByEntity.delete(actor);
   }
   cleanUpDestroyed(entity: Entity) {
-    this.dropEquipped(entity);
+    this.tryDrop(entity);
     this.spill(entity);
+  }
+  getEquipped(actor: Entity) {
+    return this.equippedByEntity.get(actor);
   }
 }
 

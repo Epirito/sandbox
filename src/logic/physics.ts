@@ -41,31 +41,31 @@ export class PhysicsSystem {
   removeOnUnplaced(entity: Entity, callback: () => void) {
     this.unplaced.removeEventListener(entity.id, callback);
   }
-  removeOnUnplacedFrom(position: [number, number], callback: (entity: Entity) => void) {
-    this.unplacedFrom.removeEventListener(JSON.stringify(position), (e: Event) => callback((e as CustomEvent).detail));
-  }
   onPlaced(entity: Entity, callback: () => void) {
     this.placed.addEventListener(entity.id, callback);
-  }
-  onPlacedAt(position: [number, number], callback: (entity: Entity) => void) {
-    this.placedAt.addEventListener(JSON.stringify(position), (e: Event) => callback((e as CustomEvent).detail));
-  }
-  onUnplacedFrom(position: [number, number], callback: (entity: Entity) => void) {
-    this.unplacedFrom.addEventListener(JSON.stringify(position), (e: Event) => callback((e as CustomEvent).detail));
   }
   removeOnPlaced(entity: Entity, callback: () => void) {
     this.placed.removeEventListener(entity.id, callback);
   }
-  removeOnPlacedAt(position: [number, number], callback: (entity: Entity) => void) {
-    this.placedAt.removeEventListener(JSON.stringify(position), (e: Event) => callback((e as CustomEvent).detail));
+  removeOnUnplacedFrom(position: [number, number], callback: (event: CustomEvent) => void) {
+    this.unplacedFrom.removeEventListener(JSON.stringify(position), callback as (Event)=>void);
+  }
+  onPlacedAt(position: [number, number], callback: (evt: CustomEvent) => void) {
+    this.placedAt.addEventListener(JSON.stringify(position), callback as (Event)=>void);
+  }
+  onUnplacedFrom(position: [number, number], callback: (evt: CustomEvent) => void) {
+    this.unplacedFrom.addEventListener(JSON.stringify(position), callback as (Event)=>void);
+  }
+  removeOnPlacedAt(position: [number, number], callback: (evt: CustomEvent) => void) {
+    this.placedAt.removeEventListener(JSON.stringify(position), callback as (Event)=>void);
   }
   unplace(entity: Entity) {
     const state =  this.stateByEntity.get(entity);
-    this.stateByEntity.delete(entity);
     if (state) {
-      this.entitiesByPosition.remove(JSON.stringify(state.position), entity)
       this.unplaced.dispatchEvent(new CustomEvent(entity.id, { detail: entity }));
       this.unplacedFrom.dispatchEvent(new CustomEvent(JSON.stringify(state.position), { detail: entity }));
+      this.entitiesByPosition.remove(JSON.stringify(state.position), entity)
+      this.stateByEntity.delete(entity);
     }
   }
   private _place(entity: Entity, position: [number, number], rotation: number) {

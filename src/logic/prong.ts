@@ -19,12 +19,21 @@ export interface ProngedSpec {
         }
     >;
     //this should be made into a component and changed to inputListenerByInputKind. it would be simpler
-    inputListenerByEntityIdXInputKindPair?: Map<string, (signal: Signal) => void>;
+    inputListenerFactories?: Map<string, (prongedEntity: Entity)=>(signal: Signal)=>void>
 }
-function getProngedSpecListener(prongedEntity: Entity, input: ProngSpec) {
-    return prongedEntity.prongedSpec!.inputListenerByEntityIdXInputKindPair?.get(
-        JSON.stringify([prongedEntity.id, input.kind])
-    )!;
+export class ProngedComponent {
+    private inputListenerByInputKind?: Map<string, (event: CustomEvent)=>void>
+    inputListener(inputKind: string) {
+        return this.inputListenerByInputKind?.get(inputKind);
+    }
+    constructor(readonly prongedSpec: ProngedSpec, me: Entity) {
+        if (prongedSpec.inputListenerFactories) {
+            this.inputListenerByInputKind = new Map();
+            prongedSpec.inputListenerFactories.forEach((factory, inputKind)=>{
+                this.inputListenerByInputKind!.set(inputKind, event=>factory(me)(event.detail))
+            })
+        }
+    }
 }
 
 export interface Signal {
@@ -43,7 +52,8 @@ export const defaultSignal: Signal = {
 export class ProngSystem {
     private eventField = new EventTarget();
     private rateLimitedPoints = new Set<string>();
-    constructor(private phys: PhysicsSystem, readonly rateLimiting = 1000/15) {}
+    constructor(private phys: PhysicsSystem, readonly rateLimiting = 1000/15) {
+    }
     output(fromPosition: [number, number], signal: Signal) {
         const jsonPoint= JSON.stringify(fromPosition)
         if (this.rateLimitedPoints.has(jsonPoint)) {
@@ -58,8 +68,7 @@ export class ProngSystem {
         );
     }
     entityOutput(fromEntity: Entity, prongKind: string, signal: Signal) {
-        fromEntity
-        .prongedSpec!.prongsBySystem.get(this)
+        fromEntity.prongedComp?.prongedSpec.prongsBySystem.get(this)
         ?.outputs.forEach((output) => {
             if (output.kind === prongKind) {
             const absPos = absPosition(output.attachedVector, 
@@ -70,22 +79,22 @@ export class ProngSystem {
         });
     }
     private unplug(entity: Entity) {
-        entity.prongedSpec!.prongsBySystem.get(this)?.inputs.forEach((input) => {
+        entity.prongedComp?.prongedSpec.prongsBySystem.get(this)?.inputs.forEach((input) => {
         this.eventField.removeEventListener(
             JSON.stringify(absPosition(input.attachedVector, 
                 this.phys.position(entity)!, 
                 this.phys.rotation(entity)!)),
-            e=>{getProngedSpecListener(entity, input)((e as CustomEvent).detail as Signal)}
+            (entity.prongedComp!.inputListener(input.kind)! as (Event)=>void)
         );
         });
     }
     private plug(entity: Entity) {
-        entity.prongedSpec!.prongsBySystem.get(this)?.inputs.forEach((input) => {
+        entity.prongedComp?.prongedSpec.prongsBySystem.get(this)?.inputs.forEach((input) => {
         this.eventField.addEventListener(
             JSON.stringify(absPosition(input.attachedVector, 
                 this.phys.position(entity)!, 
                 this.phys.rotation(entity)!)),
-            e=>{getProngedSpecListener(entity, input)((e as CustomEvent).detail as Signal)}
+            (entity.prongedComp!.inputListener(input.kind)! as (Event)=>void)
         );
         });
     }
@@ -93,7 +102,7 @@ export class ProngSystem {
         this.phys.onUnplaced(entity, () => this.unplug(entity));
         this.phys.onPlaced(entity, () => this.plug(entity));
     }
-    makeRelayInputListener(entity: Entity, processing: (signal: Signal) => Signal = identityFunction) {
+    makeRelayInputListener = (entity: Entity, processing: (signal: Signal) => Signal = identityFunction)=>{
         return (signal: Signal)=>{
             const newSignal = processing(signal);
             this.entityOutput(entity, '', newSignal);
