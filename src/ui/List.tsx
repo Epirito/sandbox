@@ -1,7 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useDOMEvent, useFocusedRef } from "./hooks";
 
-export default function List(props: {onSelect: (id: string)=>void, onQSelect: (id: string)=>void, onNullQSelect: ()=>void, examinationOutputs: {glyph:string, name: string, description: string, id: string}[]}) {
+export default function List(props: {
+        onSelect: (id: string)=>void, 
+        onESelect: (id: string)=>void, 
+        onQSelect: (id: string)=>void, 
+        onNullQSelect: ()=>void, 
+        examinationOutputs: {glyph:string, name: string, description: string, id: string}[]
+    }) {
     const {examinationOutputs}  = props;
     const focused = useFocusedRef()
     const itemRefs = useRef({})
@@ -19,11 +25,16 @@ export default function List(props: {onSelect: (id: string)=>void, onQSelect: (i
                 props.onNullQSelect()
             }
         }else {
-            if (e.key==='Enter') {
-                props.onSelect(selected)
-            }
-            if (e.key==='q') {
-                props.onQSelect(selected)
+            switch(e.key) {
+                case 'enter':
+                    props.onSelect(selected)
+                break
+                case 'e':
+                    props.onESelect(selected)
+                break
+                case 'q':
+                    props.onQSelect(selected)
+                break
             }
         }
     })

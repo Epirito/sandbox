@@ -50,7 +50,7 @@ export default class ContainerSystem {
     if (!item) {
       return 'not holding item'
     }
-    this.phys.place(item,{position: this.phys.position(actor)!, rotation: 0});
+    this.phys.place(item,{position: this.phys.position(actor)!, rotation: this.phys.rotation(actor)!});
     this.equippedByEntity.delete(actor);
   }
   cleanUpDestroyed(entity: Entity) {

@@ -21,7 +21,10 @@ export interface ProngedSpec {
     //this should be made into a component and changed to inputListenerByInputKind. it would be simpler
     inputListenerFactories?: Map<string, (prongedEntity: Entity)=>(signal: Signal)=>void>
 }
-export class ProngedComponent {
+export interface IProngedComponent {
+    readonly prongedSpec: ProngedSpec
+}
+export class ProngedComponent implements IProngedComponent {
     private inputListenerByInputKind?: Map<string, (event: CustomEvent)=>void>
     inputListener(inputKind: string) {
         return this.inputListenerByInputKind?.get(inputKind);
@@ -48,8 +51,10 @@ export function signalHop(signal: Signal, entity: Entity) {
 export const defaultSignal: Signal = {
     muxStack: [],
 };
-
-export class ProngSystem {
+export interface IProngSystem {
+    isRateLimited(position: [number, number]): boolean
+}
+export class ProngSystem implements IProngSystem {
     private eventField = new EventTarget();
     private rateLimitedPoints = new Set<string>();
     constructor(private phys: PhysicsSystem, readonly rateLimiting = 1000/15) {

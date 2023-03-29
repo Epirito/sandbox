@@ -2,13 +2,14 @@ import * as ROT from "rot-js"
 import { PhysicsSystem } from "../logic/physics";
 import { getGlyph } from "./glyphs";
 import { ProngSystem } from "../logic/prong";
+import { SimulationPOV } from "../logic/simulation-pov";
 
 const bg = "black"
 const fg = "white"
 
 export class Drawing {
     #buffer: Int8Array; #display: ROT.Display | undefined = undefined
-    constructor(public w: number, public h: number, private phys: PhysicsSystem, private electricity: ProngSystem) {
+    constructor(public w: number, public h: number, private pov: SimulationPOV) {
         this.#buffer = new Int8Array(w * h)
     }
     drawingInit() {
@@ -28,8 +29,8 @@ export class Drawing {
         this.#display!.clear()
         for(let y = 0; y < this.h; y++) {
             for(let x = 0; x < this.w; x++) {
-                this.phys.entitiesAt([x, y]).forEach(entity => {
-                    this.#display!.draw(x, y, getGlyph(entity) ?? ' ', fg, this.electricity.isRateLimited([x,y]) ? 'blue' : bg)
+                this.pov.phys.entitiesAt([x, y]).forEach(entity => {
+                    this.#display!.draw(x, y, getGlyph(entity) ?? ' ', fg, this.pov.electricity.isRateLimited([x,y]) ? 'blue' : bg)
                 })
             }
         }

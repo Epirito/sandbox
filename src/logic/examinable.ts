@@ -1,7 +1,7 @@
-import Entity from "./entity";
+import Entity, { IEntity } from "./entity";
 
 export interface ExaminableComponent {
-    examine(actor?: Entity, me?: Entity): [string, string]
+    examine(actor?: IEntity, me?: IEntity): [string, string]
 }
 
 export class PlainExaminableComponent implements ExaminableComponent {

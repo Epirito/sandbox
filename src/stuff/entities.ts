@@ -5,17 +5,17 @@ import { examinables } from "../stuff/examinables";
 import { equals, rotatedBy, sum } from "../utils/vector";
 import { lampSpec, inputSpec, wireSpec, bimuxSpec } from "./pronged-specs";
 
-export const wire = (dependencies)=> {
+export const wire = (dependencies, bare)=> {
     const {electricity} = dependencies as {electricity: ProngSystem}
-    const wire = new Entity(2);
+    const wire = bare;
     wire.examinableComp = examinables.wire;
     electricity.addEntity(wire);
     wire.prongedComp = new ProngedComponent(wireSpec(dependencies), wire);
     return wire;
 }
-export const belt = (dependencies)=> {
+export const belt = (dependencies, bare)=> {
     const {phys} = dependencies as {phys: PhysicsSystem}
-    const belt = new Entity(1);
+    const belt = bare;
     belt.examinableComp = examinables.belt;
     let timeOut: number | undefined = undefined
     const listener = (evt: CustomEvent)=>{
@@ -39,9 +39,9 @@ export const belt = (dependencies)=> {
     })
     return belt;
 }
-export const pressurePlate = (triggeringSize: number)=> (dependencies)=> {
+export const pressurePlate = (triggeringSize: number)=> (dependencies, bare)=> {
     const {phys, electricity} = dependencies as {phys: PhysicsSystem, electricity: ProngSystem}
-    const plate = new Entity(1);
+    const plate = bare;
     plate.examinableComp = examinables.pressurePlate;
     electricity.addEntity(plate);
     plate.prongedComp = new ProngedComponent(inputSpec(dependencies), plate);
@@ -76,17 +76,17 @@ export const pressurePlate = (triggeringSize: number)=> (dependencies)=> {
     return plate;
 }
 
-export const lamp = (dependencies)=>{
+export const lamp = (dependencies, bare)=>{
     const {electricity} = dependencies as {electricity: ProngSystem};
-    const lamp = new Entity(2);
+    const lamp = bare;
     lamp.examinableComp = examinables.lamp;
     electricity.addEntity(lamp);
     lamp.prongedComp = new ProngedComponent(lampSpec(dependencies), lamp);
     return lamp;
 }
-export const bimux = (dependencies)=>{
+export const bimux = (dependencies, bare)=>{
     const {electricity} = dependencies as {electricity: ProngSystem};
-    const bimux = new Entity(2);
+    const bimux = bare;
     bimux.examinableComp = examinables.mux;
     electricity.addEntity(bimux);
     bimux.prongedComp = new ProngedComponent(bimuxSpec(dependencies), bimux);

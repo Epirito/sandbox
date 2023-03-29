@@ -1,10 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
-import {phys, player, charMov, electricity} from './example/index'
+import { pov } from './example/index'
 import { Drawing } from './ui/draw-rot'
-import ItemsInFrontOf from './ui/ItemsInFrontOf'
-const drawing = new Drawing(10,10, phys, electricity)
+import Ui from './ui/Ui'
+import { walk } from './logic/actions'
+const drawing = new Drawing(10,10, pov)
 drawing.drawingInit()
 const screenUpdater = new EventTarget()
 document.addEventListener('keydown', (e) => {
@@ -26,8 +27,7 @@ document.addEventListener('keydown', (e) => {
   if (rotation===undefined) {
     return
   }
-  phys.place(player, {rotation})
-  charMov.moveForward(player)
+  pov.playerAction(walk.iota, [], {rotation})
 })
 setInterval(()=>{
   drawing.draw()
@@ -35,6 +35,6 @@ setInterval(()=>{
 },1000/60)
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <ItemsInFrontOf player={player} physics={phys} screenUpdater={screenUpdater}/>
+    <Ui pov={pov} screenUpdater={screenUpdater}/>
   </React.StrictMode>,
 )

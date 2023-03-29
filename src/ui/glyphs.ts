@@ -1,8 +1,8 @@
-import Entity from "../logic/entity";
+import Entity, { IEntity } from "../logic/entity";
 import { ExaminableComponent } from "../logic/examinable";
 import { examinables } from "../stuff/examinables";
 
-const glyphs: Map<ExaminableComponent | undefined, (entity: Entity)=>string> = new Map()
+const glyphs: Map<ExaminableComponent | undefined, (entity: IEntity)=>string> = new Map()
 const rawGlyphs = {
     chest: '🗄️',
     man: '👨‍🦲',
@@ -15,7 +15,7 @@ const rawGlyphs = {
 }
 for(const glyph in rawGlyphs) {
     if (rawGlyphs[glyph].on) {
-        glyphs.set(examinables[glyph], (entity: Entity)=>{
+        glyphs.set(examinables[glyph], (entity: IEntity)=>{
             if (entity.lightSourceComp) {
                 return rawGlyphs[glyph].on
             }
@@ -25,6 +25,6 @@ for(const glyph in rawGlyphs) {
         glyphs.set(examinables[glyph], ()=>rawGlyphs[glyph])
     }
 }
-export function getGlyph(entity: Entity):string {
+export function getGlyph(entity: IEntity):string {
     return glyphs.get(entity.examinableComp)!(entity)
 }

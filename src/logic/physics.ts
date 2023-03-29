@@ -1,5 +1,5 @@
 import MultiMap from "mnemonist/multi-map";
-import Entity from "./entity";
+import Entity, { IEntity } from "./entity";
 import { sum, rotatedBy } from "../utils/vector";
 
 class PhysicsState {
@@ -10,13 +10,14 @@ class PhysicsState {
     return sum(this.position, rotatedBy(attachedVector, this.rotation));
   }
 }
-export class PhysicsSystem {
+export class PhysicsSystem implements IPhysicsSystem {
   private unplaced = new EventTarget();
   private placed = new EventTarget();
   private placedAt = new EventTarget();
   private unplacedFrom = new EventTarget();
   private stateByEntity = new Map<Entity, PhysicsState>();
   private entitiesByPosition = new MultiMap<string, Entity>();
+  
   position(entity: Entity) {
     return this.stateByEntity.get(entity)?.position;
   }
@@ -30,7 +31,7 @@ export class PhysicsSystem {
     return sum(this.facing(entity), this.position(entity)!);
   }
   isBlocked(position: [number, number]) {
-    return this.entitiesByPosition.get(JSON.stringify(position))?.some(x=>x.blocksMovement)
+    return this.entitiesByPosition.get(JSON.stringify(position))?.some(x=>x.blocksMovement) ?? false
   }
   entitiesAt(position: [number, number]) {
     return this.entitiesByPosition.get(JSON.stringify(position)) ?? [];
@@ -91,4 +92,12 @@ export class PhysicsSystem {
   destroy(entity: Entity) {
     this.unplace(entity);
   }
+}
+export interface IPhysicsSystem {
+  position(entity: IEntity): [number, number] | undefined;
+  rotation(entity: IEntity): number | undefined;
+  facing(entity: IEntity): [number, number] | undefined;
+  inFrontOf(entity: IEntity): [number, number] | undefined;
+  isBlocked(position: [number, number]): boolean;
+  entitiesAt(position: [number, number]): IEntity[],
 }

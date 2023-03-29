@@ -1,25 +1,24 @@
-import CharacterMovement from "../logic/actions";
 import ContainerSystem, { ContainerComponent, HandComponent } from "../logic/container";
-import Entity from "../logic/entity";
 import { PhysicsSystem } from "../logic/physics";
 import { ProngSystem } from "../logic/prong";
 import Simulation from "../logic/simulation";
+import { SimulationPOV } from "../logic/simulation-pov";
 import { belt, bimux, lamp, pressurePlate, wire } from "../stuff/entities";
 import { examinables } from "../stuff/examinables";
 
 export const phys = new PhysicsSystem();
 export const electricity = new ProngSystem(phys);
 export const container = new ContainerSystem(phys);
-export const charMov = new CharacterMovement(phys);
-export const sim = new Simulation({phys, electricity, container}, ({action, terms}) => {
-    console.log(action, terms);
-})
-export const player = new Entity(10);
+export let listFront = false;
+const sim = new Simulation({phys, electricity, container});
+const player = sim.bareEntity(10);
+export const pov = new SimulationPOV(sim, player);
+
 player.examinableComp = examinables.man
 player.handComp = new HandComponent(5);
 player.blocksMovement = true;
 
-const chest = new Entity(6);
+const chest = sim.bareEntity(6);
 chest.containerComp = new ContainerComponent(5);
 chest.examinableComp = examinables.chest
 chest.blocksMovement = true;
