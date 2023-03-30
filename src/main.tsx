@@ -6,21 +6,23 @@ import { Drawing } from './ui/draw-rot'
 import Ui from './ui/Ui'
 import { walk } from './logic/actions'
 const drawing = new Drawing(10,10, pov)
+import * as entities from './stuff/entities'
+
 drawing.drawingInit()
 const screenUpdater = new EventTarget()
 document.addEventListener('keydown', (e) => {
   let rotation: number | undefined = undefined
   switch(e.key) {
-    case 'ArrowRight':
+    case 'l':
       rotation = 0
     break
-    case 'ArrowUp':
+    case 'i':
       rotation = 1
     break
-    case 'ArrowLeft':
+    case 'j':
       rotation = 2
     break
-    case 'ArrowDown':
+    case 'k':
       rotation = 3
     break
   }

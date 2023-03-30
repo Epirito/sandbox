@@ -1,4 +1,4 @@
-import MultiMap from "mnemonist/multi-map";
+import MultiMap from "../utils/multi-map";
 import Entity, { IEntity } from "./entity";
 import { sum, rotatedBy } from "../utils/vector";
 
@@ -89,10 +89,28 @@ export class PhysicsSystem implements IPhysicsSystem {
     }
     this._place(entity, options.position, options.rotation);
   }
+  placeIfNotBlocked(entity: Entity, position: [number, number]) {
+    if (this.isBlocked(position)) {
+      return false
+    }
+    this.place(entity, {position});
+    return true
+  }
+  moveX(entity: Entity, delta: number) {
+    const state = this.stateByEntity.get(entity)!;
+    const destination: [number, number] = [state.position[0]+delta, state.position[1]]
+    return this.placeIfNotBlocked(entity, destination)
+  }
+  moveY(entity: Entity, delta: number) {
+    const state = this.stateByEntity.get(entity)!;
+    const destination: [number, number] = [state.position[0], state.position[1]+delta]
+    return this.placeIfNotBlocked(entity, destination)
+  }
   destroy(entity: Entity) {
     this.unplace(entity);
   }
 }
+
 export interface IPhysicsSystem {
   position(entity: IEntity): [number, number] | undefined;
   rotation(entity: IEntity): number | undefined;

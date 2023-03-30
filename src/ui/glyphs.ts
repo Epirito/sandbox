@@ -4,12 +4,12 @@ import { examinables } from "../stuff/examinables";
 
 const glyphs: Map<ExaminableComponent | undefined, (entity: IEntity)=>string> = new Map()
 const rawGlyphs = {
+    craftingTable: '🛠️',
     chest: '🗄️',
     man: '👨‍🦲',
     wire: '+',
     pressurePlate: '_',
-    mux: '>',
-    demux: '<',
+    bimux: '>',
     belt: '⬆️',
     lamp: {on: '💡', off: 'O'},
 }

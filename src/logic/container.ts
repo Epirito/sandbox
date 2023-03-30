@@ -1,4 +1,4 @@
-import { MultiMap } from "mnemonist";
+import MultiMap from "../utils/multi-map";
 import Entity from "./entity";
 import {PhysicsSystem} from "./physics";
 
@@ -9,10 +9,17 @@ export class CredentialComponent {}
 export class ContainerComponent {
   constructor(readonly capacity: number, readonly keyCanOpen?: (key: CredentialComponent)=>boolean) {}
 }
-export default class ContainerSystem {
+export interface IContainerSystem {
+  getEquipped(actor: Entity): Entity | undefined;
+  contents(container: Entity): Entity[];
+}
+export default class ContainerSystem implements IContainerSystem {
   private containedByContainer: MultiMap<Entity, Entity> = new MultiMap();
   private equippedByEntity: Map<Entity, Entity> = new Map();
   constructor(private phys: PhysicsSystem) {}
+  placeInside(container: Entity, item: Entity) {
+    this.containedByContainer.set(container, item);
+  }
   tryPickUp(actor: Entity, item: Entity) {
     if (this.getEquipped(actor)) {
       return 'already holding something'
@@ -35,7 +42,10 @@ export default class ContainerSystem {
     this.phys.unplace(actor);
     this.containedByContainer.set(container, actor);
   }
-  withdrawFrom(actor: Entity, item: Entity, container: Entity) {
+  tryWithdraw(actor: Entity, item: Entity, container: Entity) {
+    if (this.getEquipped(actor)) {
+      return 'already holding something'
+    }
     this.containedByContainer.remove(container, item);
     this.equippedByEntity.set(actor, item);  
   }
@@ -59,6 +69,9 @@ export default class ContainerSystem {
   }
   getEquipped(actor: Entity) {
     return this.equippedByEntity.get(actor);
+  }
+  contents(container: Entity) {
+    return this.containedByContainer.get(container);
   }
 }
 

@@ -2,10 +2,8 @@ import { useRef } from "react";
 import { useDOMEvent, useFocusedRef } from "./hooks";
 
 export default function List(props: {
-        onSelect: (id: string)=>void, 
-        onESelect: (id: string)=>void, 
-        onQSelect: (id: string)=>void, 
-        onNullQSelect: ()=>void, 
+        onItemSelect: {[key: string]: (id: string)=>void},
+        onNullSelect: {[key: string]: ()=>void}, 
         examinationOutputs: {glyph:string, name: string, description: string, id: string}[]
     }) {
     const {examinationOutputs}  = props;
@@ -13,7 +11,7 @@ export default function List(props: {
     const itemRefs = useRef({})
     function getSelectedId() {
         for(const id in itemRefs.current) {
-            if (itemRefs.current[id]===focused.current) {
+            if (focused.current && itemRefs.current[id]===focused.current) {
                 return id
             }
         }
@@ -21,20 +19,16 @@ export default function List(props: {
     useDOMEvent('keydown', (e)=>{
         const selected = getSelectedId()
         if (selected===undefined) {
-            if (e.key==='q') {
-                props.onNullQSelect()
+            for(const key in props.onItemSelect) {
+                if (e.key===key) {
+                    props.onNullSelect[key]()
+                }
             }
         }else {
-            switch(e.key) {
-                case 'enter':
-                    props.onSelect(selected)
-                break
-                case 'e':
-                    props.onESelect(selected)
-                break
-                case 'q':
-                    props.onQSelect(selected)
-                break
+            for(const key in props.onItemSelect) {
+                if (e.key===key) {
+                    props.onItemSelect[key](selected)
+                }
             }
         }
     })
