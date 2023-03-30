@@ -4,11 +4,11 @@ import { ProngSystem } from "../logic/prong";
 import Simulation from "../logic/simulation";
 import { SimulationPOV } from "../logic/simulation-pov";
 import { examinables } from "../stuff/examinables";
-
+const thingMaker = {}
 export const phys = new PhysicsSystem();
 export const electricity = new ProngSystem(phys);
-export const container = new ContainerSystem(phys);
-const sim = new Simulation({phys, electricity, container});
+export const container = new ContainerSystem(phys, thingMaker);
+const sim = new Simulation({phys, electricity, container, thingMaker});
 const player = sim.bareEntity(10);
 export const pov = new SimulationPOV(sim, player);
 

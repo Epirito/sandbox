@@ -1,4 +1,5 @@
 import { container } from "../example";
+import { equals, rotatedBy, sum } from "../utils/vector";
 import ContainerSystem from "./container";
 import Entity from "./entity";
 import { PhysicsSystem } from "./physics";
@@ -12,7 +13,17 @@ export class Action {
         Action.actionByIota.set(this.iota, this);
     }
 }
+export class NonPlayerAction extends Action {}
+export const push = new NonPlayerAction(undefined, dependencies=>(terms, vals)=>{
+    const {phys} = dependencies as {phys: PhysicsSystem}
+    const [entity] = terms
+    const {position, rotation} = vals as {position: [number, number], rotation: number}
 
+    const entityPos = phys.position(entity)
+    if (entityPos && equals(entityPos, position)) {
+        phys.placeIfNotBlocked(entity, sum(position, rotatedBy([1,0], rotation)))
+    }
+})
 function containerDependency(effect: (container: ContainerSystem)=>(terms: Entity[], vals?: Object)=>void){
     return (dependencies)=>effect((dependencies as {container: ContainerSystem}).container)
 }
@@ -51,3 +62,14 @@ export const walk = new Action(
         }
     }
 );
+export const craft = new Action(
+    (terms) => `${terms[0]} crafts item on ${terms[1]}`,
+    (dependencies: Object)=>(terms: Entity[], vals?: Object)=> {
+        const {container} = dependencies as {container: ContainerSystem};
+        const [actor, table] = terms;
+        const result = container.tryCraft(actor, vals!['i'], table);
+        if (result) {
+            return result
+        }
+    }
+)

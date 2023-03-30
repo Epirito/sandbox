@@ -1,5 +1,6 @@
 import { open } from "./actions";
 import { IContainerSystem } from "./container";
+import { CraftingComponent } from "./crafting";
 import Entity from "./entity";
 import { IPhysicsSystem } from "./physics";
 import { IProngSystem } from "./prong";

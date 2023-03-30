@@ -3,7 +3,7 @@ import { useDOMEvent, useFocusedRef } from "./hooks";
 
 export default function List(props: {
         onItemSelect: {[key: string]: (id: string)=>void},
-        onNullSelect: {[key: string]: ()=>void}, 
+        onNullSelect?: {[key: string]: ()=>void}, 
         examinationOutputs: {glyph:string, name: string, description: string, id: string}[]
     }) {
     const {examinationOutputs}  = props;
@@ -21,13 +21,13 @@ export default function List(props: {
         if (selected===undefined) {
             for(const key in props.onItemSelect) {
                 if (e.key===key) {
-                    props.onNullSelect[key]()
+                    props.onNullSelect?.[key]()
                 }
             }
         }else {
             for(const key in props.onItemSelect) {
                 if (e.key===key) {
-                    props.onItemSelect[key](selected)
+                    props.onItemSelect?.[key](selected)
                 }
             }
         }

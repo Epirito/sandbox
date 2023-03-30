@@ -1,19 +1,19 @@
-import ContainerSystem, { ContainerComponent } from "../logic/container";
 import Entity from "../logic/entity";
 import { PhysicsSystem } from "../logic/physics";
 import { ProngSystem, ProngedComponent, defaultSignal} from "../logic/prong";
-import { examinables } from "../stuff/examinables";
 import { equals, rotatedBy, sum } from "../utils/vector";
 import { lampSpec, inputSpec, wireSpec, bimuxSpec } from "./pronged-specs";
+import { CraftingComponent, Recipe } from "../logic/crafting";
 export type EntityFactory = (dependencies: Object, bare: Entity)=>Entity
-export const entities = {
+export const entities: {[x: string]: (dep, bare: Entity)=>Entity} = {
     craftingTable: (dependencies, bare: Entity)=> {
-        const {container, make} = dependencies as {container: ContainerSystem, make}
         const table = bare;
-        table.containerComp = new ContainerComponent(10);
-        const craftItem = (actor: Entity, item: string)=>{
-            container.placeInside(table, make(item))
+        const godRecipes: Recipe[] = []
+        for(const entity in entities) {
+            godRecipes.push(new Recipe(entity, []))
         }
+        const godCraftingComp = new CraftingComponent(godRecipes)
+        table.craftingComp = godCraftingComp
         table.blocksMovement = true;
         return table;
     },

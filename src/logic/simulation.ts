@@ -6,9 +6,8 @@ import Entity from "./entity";
 
 export default class Simulation {
     private entityById: Map<string, Entity> = new Map();
-    public systems: Object = {make: this.make};
-    constructor(systems: Object, public onActionDone?: (data: {action: Action, terms: Entity[]})=>void, public onActionFailed?: (data: {action: Action, terms: Entity[], error: string})=>void) {
-        Object.assign(this.systems, systems)
+    constructor(readonly systems: Object, public onActionDone?: (data: {action: Action, terms: Entity[]})=>void, public onActionFailed?: (data: {action: Action, terms: Entity[], error: string})=>void) {
+        (this.systems as {thingMaker}).thingMaker.make = this.make
     }
     doAction(actionIota: number, ids: string[], vals?: Object) {
         const terms = ids.map(x=>this.entityById.get(x)!)
@@ -23,9 +22,10 @@ export default class Simulation {
     static getId() {
         return random.next().toString(36).substring(2)
     }
-    make(thing: string) {
+    make = (thing: string)=>{
         const entity = entities[thing](this.systems,this.bareEntity(1))
         entity.examinableComp = examinables[thing]
+        entity.essence = thing
         return entity
     }
     bareEntity(size, blocksMovement = false) {

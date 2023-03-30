@@ -30,7 +30,7 @@ export class Drawing {
         for(let y = 0; y < this.h; y++) {
             for(let x = 0; x < this.w; x++) {
                 this.pov.phys.entitiesAt([x, y]).forEach(entity => {
-                    this.#display!.draw(x, y, getGlyph(entity) ?? ' ', fg, this.pov.electricity.isRateLimited([x,y]) ? 'blue' : bg)
+                    this.#display!.draw(x, y, getGlyph(entity, this.pov) ?? ' ', fg, this.pov.electricity.isRateLimited([x,y]) ? 'blue' : bg)
                 })
             }
         }
