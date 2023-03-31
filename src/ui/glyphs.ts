@@ -1,3 +1,4 @@
+import { trivialSystem } from "../example";
 import Entity, { IEntity } from "../logic/entity";
 import { ExaminableComponent } from "../logic/examinable";
 import { IPhysicsSystem, PhysicsSystem } from "../logic/physics";
@@ -34,6 +35,8 @@ for(const glyph in rawGlyphs) {
 export function getGlyph(entity: IEntity, pov: SimulationPOV):string {
     return glyphs.get(entity.examinableComp)!(entity, pov.phys)
 }
+const dummyEntity =  new Entity('',1)
+const dummyPhysics = new PhysicsSystem(trivialSystem())
 export function getStaticGlyph(examinable: ExaminableComponent) {
-    return glyphs.get(examinable)!(new Entity('',1), new PhysicsSystem())
+    return glyphs.get(examinable)!(dummyEntity, dummyPhysics)
 }

@@ -1,20 +1,11 @@
 import { container } from "../example";
 import { equals, rotatedBy, sum } from "../utils/vector";
-import ContainerSystem from "./container";
-import Entity from "./entity";
-import { PhysicsSystem } from "./physics";
-export class Action {
-    static n = 0;
-    private static actionByIota = new Map<number, Action>();
-    static byIota = (iota: number) => Action.actionByIota.get(iota);
-    readonly iota!: number
-    constructor(readonly verb?: (terms: string[])=>string, readonly effect?: (dependencies: Object)=>(terms: Entity[], vals?: Object)=>void|(string|undefined)) {
-        this.iota = Action.n++;
-        Action.actionByIota.set(this.iota, this);
-    }
-}
-export class NonPlayerAction extends Action {}
-export const push = new NonPlayerAction(undefined, dependencies=>(terms, vals)=>{
+import { Action } from "../logic/action";
+import ContainerSystem from "../logic/container";
+import Entity from "../logic/entity";
+import { PhysicsSystem } from "../logic/physics";
+
+export const push = new Action(undefined, dependencies=>(terms, vals)=>{
     const {phys} = dependencies as {phys: PhysicsSystem}
     const [entity] = terms
     const {position, rotation} = vals as {position: [number, number], rotation: number}
@@ -24,6 +15,7 @@ export const push = new NonPlayerAction(undefined, dependencies=>(terms, vals)=>
         phys.placeIfNotBlocked(entity, sum(position, rotatedBy([1,0], rotation)))
     }
 })
+
 function containerDependency(effect: (container: ContainerSystem)=>(terms: Entity[], vals?: Object)=>void){
     return (dependencies)=>effect((dependencies as {container: ContainerSystem}).container)
 }

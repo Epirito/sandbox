@@ -1,12 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import './index.css'
+//import './index.css'
 import { pov } from './example/index'
 import { Drawing } from './ui/draw-rot'
 import Ui from './ui/Ui'
-import { walk } from './logic/actions'
-const drawing = new Drawing(10,10, pov)
-import * as entities from './stuff/entities'
+import { walk } from './stuff/actions'
+import { clock } from './example/index'
+const drawing = new Drawing(30,30, pov)
 
 drawing.drawingInit()
 const screenUpdater = new EventTarget()
@@ -32,11 +32,12 @@ document.addEventListener('keydown', (e) => {
   pov.playerAction(walk.iota, [], {rotation})
 })
 setInterval(()=>{
+  clock.tick()
   drawing.draw()
   screenUpdater.dispatchEvent(new Event('updated'))
 },1000/60)
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <Ui pov={pov} screenUpdater={screenUpdater}/>
+    <Ui pov={pov} addScreenListener={clock.onTick} removeScreenListener={clock.removeOnTick}/>
   </React.StrictMode>,
 )

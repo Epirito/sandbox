@@ -2,6 +2,8 @@ import Entity from "./entity";
 import {PhysicsSystem} from "./physics";
 import { absPosition } from "../utils/vector";
 import identityFunction from "../utils/identity-function";
+import { System } from "./simulation";
+import { Action } from "./action";
 
 export class ProngSpec {
     constructor(
@@ -37,6 +39,9 @@ export class ProngedComponent implements IProngedComponent {
             })
         }
     }
+    copy(newEntity) {
+        return new ProngedComponent(this.prongedSpec, newEntity)
+    }
 }
 
 export interface Signal {
@@ -51,13 +56,26 @@ export function signalHop(signal: Signal, entity: Entity) {
 export const defaultSignal: Signal = {
     muxStack: [],
 };
-export interface IProngSystem {
+export interface IProngSystem extends System {
     isRateLimited(position: [number, number]): boolean
 }
+
 export class ProngSystem implements IProngSystem {
+    static plug = new Action(undefined, dependencies=>(terms,vals) => {
+        const {electricity} = dependencies as {electricity: ProngSystem}
+        const [entity] = terms
+        electricity.plug(entity)
+    })
+    static unplug = new Action(undefined, dependencies=>(terms,vals) => {
+        const {electricity} = dependencies as {electricity: ProngSystem}
+        const [entity] = terms
+        electricity.unplug(entity)
+    })
     private eventField = new EventTarget();
     private rateLimitedPoints = new Set<string>();
-    constructor(private phys: PhysicsSystem, readonly rateLimiting = 1000/15) {
+    phys: PhysicsSystem;
+    constructor(private dependencies: Object, readonly rateLimiting = 1000/15) {
+        this.phys = dependencies['phys'] as PhysicsSystem;
     }
     output(fromPosition: [number, number], signal: Signal) {
         const jsonPoint= JSON.stringify(fromPosition)
@@ -104,8 +122,8 @@ export class ProngSystem implements IProngSystem {
         });
     }
     addEntity(entity: Entity) {
-        this.phys.onUnplaced(entity, () => this.unplug(entity));
-        this.phys.onPlaced(entity, () => this.plug(entity));
+        this.phys.onUnplaced(entity, [ProngSystem.unplug.iota, [entity.id], {}]);
+        this.phys.onPlaced(entity, [ProngSystem.plug.iota, [entity.id], {}]);
     }
     makeRelayInputListener = (entity: Entity, processing: (signal: Signal) => Signal = identityFunction)=>{
         return (signal: Signal)=>{
@@ -115,5 +133,9 @@ export class ProngSystem implements IProngSystem {
     }
     isRateLimited(position: [number, number]) {
         return this.rateLimitedPoints.has(JSON.stringify(position))
+    }
+    copy(dependencies) {
+        const copy = new ProngSystem(dependencies, this.rateLimiting)
+        return copy
     }
 }

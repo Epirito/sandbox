@@ -1,6 +1,9 @@
 import { ProngSpec, ProngSystem, Signal, signalHop } from "../logic/prong";
-import { LightSourceComponent } from "../logic/lightning";
+import { LightSourceComponent } from "../logic/lighting";
 import Entity from "../logic/entity";
+import { Scheduler } from "../logic/scheduler";
+import { muxDequeue, turnOff } from "./world-actions";
+import { ActionRequester } from "../logic/action-requester";
 export const inputSpec = (dependencies)=> {
     const electricity = dependencies.electricity;
     return {
@@ -19,6 +22,7 @@ export const inputSpec = (dependencies)=> {
 }
 export const lampSpec = dependencies=> {
     const electricity = dependencies.electricity;
+    const scheduler = dependencies['scheduler'] as Scheduler;
     let timeOut:  number | undefined = undefined;
     return {
         prongsBySystem: new Map([
@@ -35,10 +39,8 @@ export const lampSpec = dependencies=> {
         inputListenerFactories: new Map([
             ["", (entity)=> (_)=> {
                 entity.lightSourceComp = new LightSourceComponent(5);
-                clearTimeout(timeOut);
-                timeOut = setTimeout(()=>{
-                    entity.lightSourceComp = undefined;
-                }, 1000)
+                scheduler.clear(entity.timeOut);
+                entity.timeOut = scheduler.schedule(60, turnOff.from([entity], {}))
             }]
         ]),
     }
@@ -68,8 +70,8 @@ export const wireSpec = dependencies=> {
     }
 };
 export const bimuxSpec = (dependencies: Object)=> {
-    const electricity = (dependencies as {electricity: ProngSystem}).electricity ;
-    const  makeDemuxListener = (entity)=> (signal: Signal) => {
+    const {actionRequester, scheduler, electricity} = (dependencies as {scheduler: Scheduler, actionRequester: ActionRequester, electricity: ProngSystem});
+    const  makeDemuxListener = (entity: Entity)=> (signal: Signal) => {
         if (signal.lastHop === entity.id) {
             return
         }
@@ -79,28 +81,13 @@ export const bimuxSpec = (dependencies: Object)=> {
             electricity.entityOutput(entity, prong, signalHop(newSignal, entity))
         }
     }
-    const queue: {signal: Signal, prong: string}[] = []
-    let timeOut: number | undefined = undefined
     const makeMuxListener = (prong: string)=> (entity: Entity)=> (signal: Signal) => {
         if (signal.lastHop === entity.id) {
             return
         }
-        function outputMuxed(signalKind: {prong: string, signal: Signal}) {
-            const newSignal = Object.assign({}, signal)
-            newSignal.muxStack.push(signalKind.prong)
-            electricity.entityOutput(entity, "", signalHop(newSignal, entity))
-        }
-        if (timeOut===undefined) {
-            timeOut = setTimeout(()=>{
-                const output = queue.shift()
-                if (output!==undefined) {
-                    outputMuxed(output)
-                }
-                timeOut = undefined
-            }, electricity.rateLimiting + 1)
-            outputMuxed({signal, prong})
-        }else {
-            queue.push({signal, prong})
+        entity.signalQueueComp!.push({prong, signal})
+        if (entity.signalQueueComp!.length===1) {
+            scheduler.schedule!(Math.floor(electricity.rateLimiting*60/1000)+1, muxDequeue.from([entity]))
         }
     }
     return {

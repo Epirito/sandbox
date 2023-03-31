@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
-export function useGameState<T>(getState: ()=>T, screenUpdater: EventTarget) {
+export function useGameState<T>(getState: ()=>T, addUpdateListener: (listener: (e: Event)=>void)=>void, removeUpdateListener: (listener: (e: Event)=>void)=>void) {
     const [state, setState] = useState(getState());
     useEffect(() => {
         const listener = () => setState(getState());
-        screenUpdater.addEventListener('updated', listener);
+        addUpdateListener(listener);
         return () => {
-            screenUpdater.removeEventListener('updated', listener);
+            removeUpdateListener(listener);
         }
     }, []);
     return state;

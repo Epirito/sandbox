@@ -1,4 +1,4 @@
-import { open } from "./actions";
+import { open } from "../stuff/actions";
 import { IContainerSystem } from "./container";
 import { CraftingComponent } from "./crafting";
 import Entity from "./entity";
@@ -29,13 +29,13 @@ export class SimulationPOV {
         }
     }
     get phys(): IPhysicsSystem {
-        return this.sim.systems['phys']
+        return (this.sim.systems['phys'] as IPhysicsSystem)
     }
     get electricity(): IProngSystem {
-        return this.sim.systems['electricity']
+        return (this.sim.systems['electricity'] as IProngSystem)
     }
     get container(): IContainerSystem {
-        return this.sim.systems['container']
+        return (this.sim.systems['container'] as IContainerSystem)
     }
     playerAction(actionIota: number, ids: string[], vals?: Object) {
         this.sim.doAction(actionIota, [this.player.id, ...ids], vals)

@@ -19,4 +19,9 @@ export default class MultiMap<T,K> {
     get(key: any) {
         return [...this.map.get(key) ?? []]
     }
+    forEach(cb: (values: K[], key: T)=>void) {
+        this.map.forEach((values, key)=>{
+            cb(values, key)
+        })
+    }
 }
